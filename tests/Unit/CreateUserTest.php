@@ -15,7 +15,7 @@ class CreateUserTest extends TestCase
     {
         // $this->assertTrue(true);
         $data = [
-            'nome' => 'Michel Fernandes da Silva Alves',
+            'name' => 'Michel Fernandes da Silva Alves',
             'email' => 'michelfsa@live.com',
             'password' => '1m4d3v3l0p3r1nt3st'
         ];
@@ -28,7 +28,7 @@ class CreateUserTest extends TestCase
             'user' =>
             [
                 'id',
-                'nome',
+                'name',
                 'email'
             ]
         ]);

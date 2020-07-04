@@ -22,7 +22,7 @@ class ProductsController extends Controller
         try {
             $products = Product::all();
 
-            $actionMessage = "Products are listed for the user: ".\Auth::user()->nome;
+            $actionMessage = "Products are listed for the user: ".\Auth::user()->name;
 
             event(new UserActionsInProducts($actionMessage));
 
@@ -53,7 +53,7 @@ class ProductsController extends Controller
         try {
             $product = Product::create($request->all());
 
-            $actionMessage = "Product created_at: ($product->created_at)[$product->id, $product->name] for the user: ".\Auth::user()->nome;
+            $actionMessage = "Product created_at: ($product->created_at)[$product->id, $product->name] for the user: ".\Auth::user()->name;
 
             event(new UserActionsInProducts($actionMessage));
 
@@ -81,7 +81,7 @@ class ProductsController extends Controller
 
                 $result = Product::search($search)->group($search)->get();
 
-                $actionMessage = "Products searched with filters: [".json_encode($search)."] for the user: ".\Auth::user()->nome;
+                $actionMessage = "Products searched with filters: [".json_encode($search)."] for the user: ".\Auth::user()->name;
 
                 event(new UserActionsInProducts($actionMessage));
 
@@ -126,7 +126,7 @@ class ProductsController extends Controller
 
             $fieldsWillUpdate = $request->all();
 
-            $actionMessage = "Product is updated in (".Carbon::now()."): [old values: ".json_encode($product)."][new values: ".json_encode($fieldsWillUpdate)."] for the user: ".\Auth::user()->nome;
+            $actionMessage = "Product is updated in (".Carbon::now()."): [old values: ".json_encode($product)."][new values: ".json_encode($fieldsWillUpdate)."] for the user: ".\Auth::user()->name;
 
             foreach ($fieldsWillUpdate as $key => $field)
             {
@@ -156,7 +156,7 @@ class ProductsController extends Controller
 
             $deleted = $productDeleted->delete();
 
-            $actionMessage = "Product is deleted in (".Carbon::now()."): [Object: ".json_encode($productDeleted)."] for the user: ".\Auth::user()->nome;
+            $actionMessage = "Product is deleted in (".Carbon::now()."): [Object: ".json_encode($productDeleted)."] for the user: ".\Auth::user()->name;
 
             return response()->json(['deleted' => $deleted], 201);
         } catch (\Exception $e) {
