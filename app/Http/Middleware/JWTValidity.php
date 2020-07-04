@@ -25,7 +25,16 @@ class JWTValidity  extends BaseMiddleware
                 return response()->json(['status' => 'Unauthenticated user!'], 401);
             }
 
-            return $next($request);
+            $token = JWTAuth::getToken();
+
+            try{
+                $token = JWTAuth::refresh($token);
+
+                return $next($request);
+            }catch(TokenInvalidException $e){
+                if ($e instanceof \Tymon\JWTAuth\Exceptions\TokenInvalidException)
+                    return response()->json(['status' => 'Token is Invalid'], 401);
+            }
         } catch (\Exception $e) {
             if ($e instanceof \Tymon\JWTAuth\Exceptions\TokenInvalidException) {
                 return response()->json(['status' => 'Token is Invalid'], 401);
