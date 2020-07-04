@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CreateProductRequest;
 use App\Http\Requests\UpdateProductRequest;
+use App\Events\UserActionsInProducts;
 use Illuminate\Http\Request;
 Use App\Product;
+use Carbon\Carbon;
 
 class ProductsController extends Controller
 {
@@ -17,7 +19,17 @@ class ProductsController extends Controller
      */
     public function index()
     {
-        return response()->json(['products' => Product::all()], 201);
+        try {
+            $products = Product::all();
+
+            $actionMessage = "Products are listed for the user: ".\Auth::user()->nome;
+
+            event(new UserActionsInProducts($actionMessage));
+
+            return response()->json(['products' => $products], 201);
+        } catch(\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 
     /**
@@ -39,7 +51,13 @@ class ProductsController extends Controller
     public function store(CreateProductRequest $request)
     {
         try {
-            return response()->json(['product' => Product::create($request->all())], 201);
+            $product = Product::create($request->all());
+
+            $actionMessage = "Product created_at: ($product->created_at)[$product->id, $product->name] for the user: ".\Auth::user()->nome;
+
+            event(new UserActionsInProducts($actionMessage));
+
+            return response()->json(['product' => $product], 201);
         } catch(\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
@@ -58,15 +76,19 @@ class ProductsController extends Controller
      */
     public function search(Request $request)
     {
-        if($request->header('query') !== null) {
-            $search = json_decode($request->header('query'));
+            if($request->header('query') !== null) {
+                $search = json_decode($request->header('query'));
 
-            $result = Product::search($search)->group($search)->get();
+                $result = Product::search($search)->group($search)->get();
 
-            return response()->json(['filtered_products' => $result], 201);
-        } else {
-            return response()->json(['message' => 'Header query with search params not found'], 404);
-        }
+                $actionMessage = "Products searched with filters: [".json_encode($search)."] for the user: ".\Auth::user()->nome;
+
+                event(new UserActionsInProducts($actionMessage));
+
+                return response()->json(['filtered_products' => $result], 201);
+            } else {
+                return response()->json(['message' => 'Header query with search params not found'], 404);
+            }
     }
 
     /**
@@ -104,12 +126,16 @@ class ProductsController extends Controller
 
             $fieldsWillUpdate = $request->all();
 
+            $actionMessage = "Product is updated in (".Carbon::now()."): [old values: ".json_encode($product)."][new values: ".json_encode($fieldsWillUpdate)."] for the user: ".\Auth::user()->nome;
+
             foreach ($fieldsWillUpdate as $key => $field)
             {
                 $product->{$key} = $field;
             }
 
             $product->save();
+
+            event(new UserActionsInProducts($actionMessage));
 
             return response()->json(['product' => $product], 201);
         } catch (\Exception $e) {
@@ -126,9 +152,13 @@ class ProductsController extends Controller
     public function destroy($id)
     {
         try {
-            $productDeleted = Product::findOrFail($id)->delete();
+            $productDeleted = Product::findOrFail($id);
 
-            return response()->json(['deleted' => $productDeleted], 201);
+            $deleted = $productDeleted->delete();
+
+            $actionMessage = "Product is deleted in (".Carbon::now()."): [Object: ".json_encode($productDeleted)."] for the user: ".\Auth::user()->nome;
+
+            return response()->json(['deleted' => $deleted], 201);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Product could not be found with the passed ID', 'stackTrace' => $e->getMessage()], 500);
         }
