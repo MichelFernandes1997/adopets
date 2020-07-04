@@ -17,13 +17,13 @@ class UsersController extends Controller
      */
     public function index()
     {
-        //try {
+        try {
             $users = User::all();
 
             return response()->json(['users' => $users], 201);
-        //} catch (\Exception $e) {
-            //return response()->json(['error' => $e->getMessage()], $e->getStatusCode());
-        //}
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], $e->getStatusCode());
+        }
     }
 
     /**
