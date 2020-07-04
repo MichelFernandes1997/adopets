@@ -17,7 +17,13 @@ class UsersController extends Controller
      */
     public function index()
     {
-        return User::all();
+        try {
+            $users = User::all();
+
+            return response()->json(['users' => $users], 201);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], $e->getStatusCode());
+        }
     }
 
     /**
@@ -37,13 +43,17 @@ class UsersController extends Controller
      */
     public function store(CreateUserRequest $request)
     {
-        $user = User::create([
-            'nome' => $request->nome,
-            'email' => $request->email,
-            'password' => bcrypt($request->password)
-        ]);
+        try {
+            $user = User::create([
+                'nome' => $request->nome,
+                'email' => $request->email,
+                'password' => bcrypt($request->password)
+            ]);
 
-        return response()->json(['user' => $user], 201);
+            return response()->json(['user' => $user], 201);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], $e->getStatusCode());
+        }
     }
 
     /**
